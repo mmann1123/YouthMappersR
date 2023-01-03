@@ -5,6 +5,8 @@ output: html_document
 
 ```{r default, include=FALSE}
 knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+
 ```
  
 # Setup
@@ -12,7 +14,6 @@ knitr::opts_chunk$set(warning=FALSE)
 Before we begin our exercise, we need to install all the needed packages - we only need to use `install.packages()` once for each. However EVERY time you start using R you will need to run `library()` to load the installed package.
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 
 #install the osmdata, sf, tidyverse and ggmap package
 if(!require("osmdata")) install.packages("osmdata")
