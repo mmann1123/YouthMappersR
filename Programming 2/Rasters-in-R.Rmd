@@ -1,5 +1,5 @@
 ---
-title: "Rasters in R" 
+title: "2 - Rasters in R" 
 output: html_document
 ---
 ```{r setup, include=FALSE}
@@ -91,20 +91,20 @@ plot(CWD_A_M)
 ```
 
 
-<!-- Let's reproject that raster into a UTM zone 10 and write it back out -->
+Let's reproject that raster into a UTM zone 10 and write it back out
 
-<!-- ```{r} -->
+```{r}
 
-<!-- # Define the Proj.4 spatial reference  -->
-<!-- # https://spatialreference.org/ref/epsg/4326/ -->
-<!-- sr = "EPSG:4326"  -->
+# Define the Proj.4 spatial reference 
+# https://spatialreference.org/ref/epsg/4326/
+sr = "EPSG:4326" 
 
-<!-- # Project Raster -->
-<!-- projected_raster = projectRaster(CWD_apr, crs = sr) -->
+# Project Raster
+projected_raster = projectRaster(CWD_apr, crs = sr)
 
-<!-- # Write the RasterLayer to disk (See datatype documentation for other formats) -->
-<!-- writeRaster(projected_raster, filename="./output/CWD_apr_UTM.tif",  overwrite=TRUE) -->
-<!-- ``` -->
+# Write the RasterLayer to disk (See datatype documentation for other formats)
+writeRaster(projected_raster, filename="./output/CWD_apr_UTM.tif",  overwrite=TRUE)
+```
 
 # Raster Values
 
@@ -607,6 +607,8 @@ Step 8: Plot the `park_road_elev$dist` on the x axis and `park_road_elev$park_ro
  
 ```{r eval=T, include=FALSE}
 #ANSWER
-plot(x = park_road_elev$dist, y = park_road_elev$park_road_elev, type='line')
+plot(x = park_road_elev$dist, 
+     y = park_road_elev$park_road_elev, 
+     type='line')
 ```
 

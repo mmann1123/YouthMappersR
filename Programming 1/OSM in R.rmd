@@ -5,8 +5,6 @@ output: html_document
 
 ```{r default, include=FALSE}
 knitr::opts_chunk$set(warning=FALSE)
-knitr::opts_chunk$set(echo = TRUE)
-
 ```
  
 # Setup
@@ -14,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Before we begin our exercise, we need to install all the needed packages - we only need to use `install.packages()` once for each. However EVERY time you start using R you will need to run `library()` to load the installed package.
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 
 #install the osmdata, sf, tidyverse and ggmap package
 if(!require("osmdata")) install.packages("osmdata")
@@ -37,7 +36,7 @@ In this exercise we are going to leverage the package `osmdata` to directly quer
 
 See here for some basics on [OverpassTurbo](https://nixintel.info/osint-tools/getting-started-with-overpass-turbo-part-1/) and a formal guide on [queries](https://wiki.openstreetmap.org/wiki/Overpass_API/Language_Guide).
 
-## Building a OSM query
+# Building a OSM query
 
 In order to structure all the data in the world, OSM created a hierarchical data structure. In this case we can think of the world being broken down into spatial features (e.g. points, lines, polygons) each with a tag made up of a `Key` (e.g. amenity, building, highway etc) and `Value` (e.g. coffee shop, primary road).
 
@@ -188,6 +187,7 @@ Create a map containing the polygons for both restaurants and pharmacies in King
 Remember in coding, its always recommend to copy and paste a working example.
 
 ```{r eval=FALSE, include=FALSE}
+# answer
 query = getbb(place_name="Kingston, Jamaica") %>%
       opq() %>%
        add_osm_feature(key="amenity", value="restaurant")
@@ -202,6 +202,7 @@ pharmacy = osmdata_sf(q=query)
 ```
 
 ```{r eval=FALSE, include=FALSE}
+#answer
 mapview(restaurant$osm_polygons, legend=F, label = restaurant$osm_polygons$name ) + mapview(pharmacy$osm_polygons, legend=F, label = restaurant$osm_polygons$name )
 ```
 
