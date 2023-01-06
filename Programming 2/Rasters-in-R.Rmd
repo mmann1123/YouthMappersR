@@ -8,30 +8,23 @@ knitr::opts_chunk$set(warning=FALSE)
 
 The first time you use a new version of R you will have to install all your packages. Try installing the raster and rgdal packages if you don't have them already:
 
-```{r warning=FALSE, echo=FALSE}
+```{r include=T,  warning=FALSE}
 if(!require("raster")) install.packages("raster")
 if(!require("rgdal")) install.packages("rgdal")
 if(!require("lwgeom")) install.packages("lwgeom")
 if(!require("sf")) install.packages("sf")
 if(!require("dplyr")) install.packages("dplyr")
 if(!require("osmdata")) install.packages("osmdata")
-
 ```
 
-Now it is installed in your computer but isn't loaded You will have to 'import' your library package every time you start up R. 
-```{r}
-library(raster)
-library(rgdal)
-```
 
-Raster data is stored in a format similar to that of a matrix, except you have added data about georeferencing.
+Raster data is stored in a format similar to that of a matrix of numbers, except you have added data about the coordinate references system (projection).
 
 Let's read in one raster and take a look
  
-
 # Examine Raster Data 
 
-notice that the working directory doesn't need to be a path directly below your files of interest:
+Notice that the working directory doesn't need to be a path directly below your files of interest:
 
 ```{r}
 CWD_apr = raster('./data/raster/CWD/cwd2010apr.tif')
@@ -54,7 +47,9 @@ plot(CWD_apr,main = 'Title')
 ```
 
 ```{r}
-plot(CWD_apr,col= heat.colors(10), main='Water Deficit' ) # 10 designates the number of hex color codes that get generated
+plot(CWD_apr,
+     col= heat.colors(10), 
+     main='Water Deficit' ) # 10 designates the number of hex color codes that get generated
 ```
 
 Now use ?plot to change col to a different preset color scheme
@@ -63,18 +58,16 @@ Now use ?plot to change col to a different preset color scheme
 ?plot
 ```
 
-
 # Raster Math  
 
 Rasters like matrices can make basic math functions very easy. Note that rasters can be used in basic operations like CWD_apr *2 or CWD_apr^2. 
 
-However teo rasters with different extents, cell sizes, or projections CAN'T be used. You would need to reprojected and aligned first. 
+However teo rasters with different extents, cell sizes, or projections CAN'T be used. You would need to reprojected and aligned first, this can be done using the `projectRaster()` function, run `?projectRaster` for help. 
 
 ```{r}
 CWD_apr_sq = CWD_apr^2
 plot(CWD_apr_sq, main='CWD Squared')
 ```
-
 
 Now lets add two different rasters. Use the raster() function to read in the CWD for May
 
@@ -82,6 +75,7 @@ Now lets add two different rasters. Use the raster() function to read in the CWD
 CWD_may = raster('./data/raster/CWD/cwd2010may.tif')
 ```
 
+Now let's add two months of data values:
 
 ```{r}
 #CWD_may = raster('fill/in/the/path/file.tif')
@@ -89,7 +83,6 @@ CWD_may = raster('./data/raster/CWD/cwd2010may.tif')
 CWD_A_M = CWD_apr + CWD_may
 plot(CWD_A_M)
 ```
-
 
 Let's reproject that raster into a UTM zone 10 and write it back out
 
@@ -100,7 +93,7 @@ Let's reproject that raster into a UTM zone 10 and write it back out
 sr = "EPSG:4326" 
 
 # Project Raster
-projected_raster = projectRaster(CWD_apr, crs = sr)
+projected_raster = raster::projectRaster(CWD_apr, crs = sr)
 
 # Write the RasterLayer to disk (See datatype documentation for other formats)
 writeRaster(projected_raster, filename="./output/CWD_apr_UTM.tif",  overwrite=TRUE)
@@ -115,7 +108,7 @@ zeros = setValues(CWD_may,0)
 plot(zeros)
 ```
 
-Note that `zeros` has the same extent, resolution, and projection as `CWD_may`
+Note that `zeros` raster has the same extent, resolution, and projection as `CWD_may`
 
 ```{r}
 print(zeros)
@@ -128,12 +121,12 @@ We can also use boolean queries to update certain values. Here we update certain
 CWD_may[CWD_may>150] = 5000
 plot(CWD_may)
 ```
-Note that we have now changed the values of `CWD_may`... if we want to original values again, we will need to read them back in again with `CWD_may = raster('./data/raster/CWD/cwd2010may.tif')`.
 
+Note that we have now changed the values of `CWD_may`... if we want to original values again, we will need to read them back in again with `CWD_may = raster('./data/raster/CWD/cwd2010may.tif')`.
 
 # Challenge Question 
  
-In this section we will try to get the average water deficit for California for the whole year of 2010. To do this we will need to isolate the files we are interested in using - those ending with `.tif`. 
+In this section we will try to get the average water deficit for California for the whole year of 2010. To do this we will need to isolate the files we are interested in using - those ending with `.tif`. We will use the function `list.files()` which creates a list of all the files in a particular folder. 
 
 First lets get a list of all files in our raster folder:
 
@@ -145,34 +138,39 @@ Notice that .png and twf xml files are also listed. We can narrow this down by u
 Here we will only list files that have `.tif` in the name:
 
 ```{r}
-list.files(path="./data/raster/CWD/",pattern = '.tif')
+list.files(path="./data/raster/CWD/",
+           pattern = '.tif')
 ```
 
 almost there... we still have problems with .tif.* files like  tif.xml or tif.aux.xml. We can limit these using what I will call an ANTI-wildcard. "$". `'.tif\$'` will tell the computer the file needs to END in `.tif`.  Let's also store the path/file name by setting `full.names=TRUE`
 
 ```{r}
-list.files(path="./data/raster/CWD/",pattern = '.tif$', full.names=TRUE)
+list.files(path="./data/raster/CWD/",
+           pattern = '.tif$', 
+           full.names=TRUE)
 ```
 
-Let's store that information:
+Let's store that information in a variable called `CWDS`:
 
 ```{r}
-CWDS = list.files(path="./data/raster/CWD/", pattern = 'tif$', full.names=TRUE)
+CWDS = list.files(path="./data/raster/CWD/", 
+                  pattern = 'tif$', 
+                  full.names=TRUE)
 ```
 
 Challenge: In teams read in and sum all of these rasters, then divide by the total number of files. 
 
-```{r eval=FALSE, include=FALSE}
-# BASIC SOLUTION
+```{r eval=FALSE, include=T}
+# Hint
 jan = raster("./data/raster/CWD//cwd2010jan.tif")
 feb = raster("./data/raster/CWD//cwd2010feb.tif")
 # etc
 
 # sum them then divide by total number of files  (need to include other months)
 CWD_mn_2010 = (jan+feb ) / 2
+```
 
-
-
+```{r eval=FALSE, include=FALSE}
 ### EXPERT SOLUTION
 
 # read in example and set values to zero
@@ -210,7 +208,7 @@ do.call(file.remove, list(list.files("./output", full.names = TRUE)))
 
 # Raster Stacks  
 
-R also has the capactiy to handle multi-band or multi-layer raster 'stacks'. 
+R also has the capacity to handle multi-band or multi-layer raster 'stacks'. 
 ![raster stack](./raster_stack.png)
 In this case we will be using a stack to combine multiple files of the same type (CWD) over time (months of 2010). As you will see there are multiple advantages to handling data in stacks. 
 
@@ -245,6 +243,7 @@ plot(CWD_mn_2010)
 ```
 
 We can also do 'global' statistics like finding the 'mean' of all cells for any given month. 
+
 ```{r}
 cellStats(cwd_stack, stat='mean', na.rm=TRUE)
 ```
@@ -268,10 +267,11 @@ We will use two objects to illustrate raster cropping:
 Both target and cropping objects must have the same projection. The following code chunk therefore not only reads the datasets from the `spDataLarge` package. This package needs to be installed directly from github using the following code:
 
 ```{r eval=FALSE, include=TRUE}
-install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
+# this has already been done for you, please don't run
+#install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
 ```
 
-We will also need to import the `sf` package to handle vector data. 
+We will also need to install/import the `sf` package to handle vector data. 
 
 ```{r}
 if(!require("spDataLarge")) install.packages("spDataLarge")
@@ -289,7 +289,7 @@ plot(srtm)
 plot(zion, add=TRUE)
 ```
 
-We use crop() from the raster package to crop the srtm raster. The function reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument. 
+We use `crop()` from the raster package to crop the `srtm` raster. The function reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument. 
 
 ```{r message=FALSE, warning=FALSE}
 srtm_cropped = crop(srtm, zion)
@@ -298,14 +298,14 @@ plot(zion, add=TRUE)
 ```
 Note that the extent of the `strm` raster has been cropped to fit the `zion` polygon. 
 
-Related to crop() is the terra function mask(), which sets values outside of the bounds of the object passed to its second argument to NA. The following command therefore masks every cell outside of the Zion National Park boundaries:
+Related to `crop()` is the terra function `mask()`, which sets values outside of the bounds of the object are converted to `NA`, or a missing value. The following command therefore masks every cell outside of the Zion National Park boundaries:
 
 ```{r message=FALSE, warning=FALSE}
 srtm_masked = mask(srtm, zion)
 plot(srtm_masked)
 ```
 
-Importantly, we want to use both crop() and mask() together in most cases. This combination of functions would (a) limit the raster’s extent to our area of interest and then (b) replace all of the values outside of the area to NA.
+Importantly, we want to use both `crop()` and `mask()` together in most cases. This combination of functions would (a) limit the raster’s extent to our area of interest and then (b) replace all of the values outside of the area to NA.
 
 ```{r}
 srtm_cropped = crop(srtm, zion)
@@ -313,7 +313,7 @@ srtm_final = mask(srtm_cropped, zion)
 plot(srtm_final)
 ```
 
-Changing the settings of mask() yields different results. Setting updatevalue = 0, for example, will set all pixels outside the national park to 0. Setting inverse = TRUE will mask everything inside the bounds of the park (see ?mask for details) 
+Changing the settings of `mask()` yields different results. Setting `updatevalue = 0`, for example, will set all pixels outside the national park to `0`. Setting `inverse = TRUE` will mask everything inside the bounds of the park (see `?mask` for details) 
 
 ```{r}
 srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
@@ -322,22 +322,29 @@ plot(srtm_inv_masked)
 
 ## Raster extraction
 
-Raster extraction is the process of identifying and returning the values associated with a ‘target’ raster at specific locations, based on a (typically vector) geographic ‘selector’ object. The results depend on the type of selector used (points, lines or polygons) and arguments passed to the extract() function, which we use to demonstrate raster extraction. The reverse of raster extraction — assigning raster cell values based on vector objects — is rasterization.
+Raster extraction is the process of identifying and returning the values associated with a ‘target’ raster at specific locations, based on a (typically vector) geographic object location. The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `extract()` function, which we use to demonstrate raster extraction. The reverse of raster extraction — assigning raster cell values based on vector objects — is rasterization.
 
 The basic example is of extracting the value of a raster cell at specific points. For this purpose, we will use `zion_points`, which contain a sample of 30 locations within the Zion National Park. 
 
 ```{r warning=FALSE}
+# access some available data called zion_points
 data("zion_points", package = "spDataLarge")
+# now plot them all 
 plot(srtm)
 plot(zion, add=TRUE, col=NA)
 plot(zion_points, add=TRUE, col='red')
 ```
 
-The following command extracts elevation values from `srtm` and creates a data frame with `points` IDs (one value per vector’s row) and related `srtm` values for each point. Now, we can add the resulting object to our `zion_points` dataset with the `cbind()` function:
-
+The following command extracts elevation values from `srtm` and creates a data frame with `points` IDs (one value per vector’s row) and related `srtm` values for each point. 
 
 ```{r}
 elevation = extract(srtm, zion_points)
+elevation
+```
+
+Now, we can add the resulting object to our `zion_points` dataset with the `cbind()` function:
+
+```{r}
 zion_points = cbind(zion_points, elevation) # insert the elevation data into the orginal shapefile
 zion_points
 ```
@@ -354,12 +361,16 @@ mapview(zion_points, zcol='elevation')
 Let's tie this lesson back to our work with OSM. Here we are going to import the package `osmdata` to allow us to interact with the Overpass Turbo API.  Let's try to build a query using a bounding box from `getbb()`, where we search for Zion National Park, this bounding box then get passed to Overpass Turbo and restaurants will be added. 
 
 ```{r eval=FALSE, include=TRUE}
+# import functions from osmdata library
 if(!require("osmdata")) install.packages("osmdata")
 
+
+# create a overpass turbo query
 query = getbb(place_name="Zion National Park, Utah, USA") %>%
       opq() %>%
        add_osm_feature(key="amenity", value="restaurant")
 
+# convert to a spatial data type sf 
 restaurant = osmdata_sf(q=query)
 ```
 
@@ -368,6 +379,7 @@ Ok, bad request! Thats not too specific. Let's try to see what happened. First l
 ```{r eval=FALSE, include=TRUE}
 getbb(place_name="Zion National Park, Utah, USA")
 ```
+
 Looks like that is the problem. You can try to see if you can adjust the name to get a valid response. But its likely we will need to create a bounding box manually. Luckily we can get the bounding box from the `srtm` raster file using `bbox(srtm)`, this then needs to be converted to a vector using `c()` in order to meet the requirement of the  `opq` function. Look at `?opq`, notice that we can pass a bounding box in the format `bbox = c(xmin, ymin, xmax, ymax)`.  
 
 Note: bounding boxes can also be found using tools like [bboxfinder.com](http://bboxfinder.com/#0.000000,0.000000,0.000000,0.000000).
@@ -382,18 +394,46 @@ restaurant = osmdata_sf(q=query)
 restaurant
 
 ```
+Let's just focus on the points that we returned to us:
+```{r}
+restaurant_points = restaurant$osm_points
+restaurant_points
+```
+
+That is too much data. Let's `select` only those columns we are interested in:
+```{r}
+restaurant_points = subset(restaurant_points, select = c(name,phone ))
+restaurant_points
+```
+
 
 Now let's plot it out and assign the restaurant names as labels:
 
 ```{r}
 mapview(srtm)+
-mapview(restaurant$osm_points,
-        label = restaurant$osm_points$name,
+mapview(restaurant_points,
+        label = restaurant_points$name,
         legend=F)
 ```
-Raster extraction also works with line selectors. Then, it extracts one value for each raster cell touched by a line. In this case, the best approach is to split the line into many points and then extract the values for these points. To demonstrate this, the code below creates zion_transect, a straight line going from northwest to southeast of the Zion National Park
 
-Let's create a line based on two points `c(-113.2, -112.9)` and  `c(37.45, 37.2)` which are xy pairs in lat lon. Note that we are assigning a projection using an EPSG code of  `4326`. EPSG codes are unique idenitifying codes that are availabel for all common projections. To look up EPSG codes please go to [https://epsg.io](https://epsg.io).
+Let's extract the elevation of each restaurant, following the same code as earlier:
+```{r}
+elevation = extract(srtm, restaurant_points)
+elevation
+```
+
+Now, we can add the resulting list of elevation values to our `restaurant_points` dataset with the `cbind()` function:
+
+```{r}
+restaurant_points = cbind(restaurant_points, elevation) # insert the elevation data into the orginal shapefile
+restaurant_points
+```
+
+## Extract Values Along a Line
+
+Raster extraction also works with line selectors. Then, it extracts one value for each raster cell touched by a line. In this case, the best approach is to split the line into many points and then extract the values for these points. To demonstrate this, the code below creates `zion_transect`, a straight line going from northwest to southeast of the Zion National Park
+
+Let's create a line based on two points `c(-113.2, -112.9)` and  `c(37.45, 37.2)` which are xy pairs in lat lon. Note that we are assigning a projection using an EPSG code of  `4326`. EPSG codes are unique identifying codes that are available for all common projections. To look up EPSG codes please go to [https://epsg.io](https://epsg.io).
 
 ```{r}
 zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
@@ -407,7 +447,8 @@ Now let's see if its showing up in the right place
 
 ```{r}
 mapview(srtm)+
-mapview(zion_transect, color='white')
+mapview(zion_transect, 
+        color='white')
 ```
 The utility of extracting heights from a linear selector is illustrated by imagining that you are planning a hike. The method demonstrated below provides an ‘elevation profile’ of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs.
 
@@ -604,6 +645,16 @@ park_road_elev
 ```
 
 Step 8: Plot the `park_road_elev$dist` on the x axis and `park_road_elev$park_road_elev` on the y axis, and set the `type` to `'line'`. 
+ 
+```{r}
+### ### ### ### ### 
+# YOUR CODE HERE
+### ### ### ### ### 
+
+# plot(x = park_road_elev$?????, 
+#      y = park_road_elev$?????, 
+#      type='line')
+```
  
 ```{r eval=T, include=FALSE}
 #ANSWER

@@ -5,34 +5,27 @@ output: html_document
 
 ```{r default, include=FALSE}
 knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
  
 # Setup
 
 Before we begin our exercise, we need to install all the needed packages - we only need to use `install.packages()` once for each. However EVERY time you start using R you will need to run `library()` to load the installed package.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+In this case we will use `if(!require("osmdata")) install.packages("osmdata")` to check if the package or library called `osmdata` is installed, if it is, we load it, and if it's not it will be installed for us. 
 
-#install the osmdata, sf, tidyverse and ggmap package
+```{r setup, include=FALSE}
+
+#load or install the osmdata, sf, tidyverse and ggmap package etc
 if(!require("osmdata")) install.packages("osmdata")
 if(!require("tidyverse")) install.packages("tidyverse")
 if(!require("sf")) install.packages("sf")
 if(!require("ggmap")) install.packages("ggmap")
 if(!require("mapview")) install.packages("mapview")
 if(!require("DiagrammeR")) install.packages("DiagrammeR")
-
-#load packages
-library(tidyverse)
-library(osmdata)
-library(sf)
-library(ggmap)
-library(mapview)
-library(DiagrammeR)
-
 ```
 
-In this exercise we are going to leverage the package `osmdata` to directly query and download features from OSM. This package will directly access the [Overpass Turbo API](https://wiki.openstreetmap.org/wiki/Overpass_turbo) to create and make queries directly from the R environment. Nevertheless, the use of the overpass-turbo.eu can be useful when we are not sure what we are looking for or when we have some difficulty in building the query.
+In this exercise we are going to leverage the package `osmdata` to directly query and download features from OSM. This package will directly access the [Overpass Turbo API](https://wiki.openstreetmap.org/wiki/Overpass_turbo) to create and make queries directly from the R environment. Nevertheless, the use of the [overpass-turbo.eu](overpass-turbo.eu) can be useful when we are not sure what we are looking for or when we have some difficulty in building the query.
 
 See here for some basics on [OverpassTurbo](https://nixintel.info/osint-tools/getting-started-with-overpass-turbo-part-1/) and a formal guide on [queries](https://wiki.openstreetmap.org/wiki/Overpass_API/Language_Guide).
 
@@ -40,7 +33,7 @@ See here for some basics on [OverpassTurbo](https://nixintel.info/osint-tools/ge
 
 In order to structure all the data in the world, OSM created a hierarchical data structure. In this case we can think of the world being broken down into spatial features (e.g. points, lines, polygons) each with a tag made up of a `Key` (e.g. amenity, building, highway etc) and `Value` (e.g. coffee shop, primary road).
 
-We can look the tagging convension on [OSM's map features directory](https://wiki.openstreetmap.org/wiki/Map_features).
+We can look the tagging conversion on [OSM's map features directory](https://wiki.openstreetmap.org/wiki/Map_features).
 
 
 ```{r echo=FALSE, fig.height=2, fig.width=2}
@@ -95,7 +88,7 @@ Use the `available_features()` and `available_tags("a_feature_name")` to find th
 
 ## Your First Query - Exploring Jamaica
 
-In this example we will be exploring the area around you in Jamaica. First it helps to go to [OSM](https://www.openstreetmap.org/) and figure how features and tags can be found.
+In this example we will be exploring the area around you in Jamaica. First it helps to go to [OSM https://www.openstreetmap.org/](https://www.openstreetmap.org/) and figure how features and tags can be found.
 
 To find feature tag pairs zoom to a business of interest, right-click \> Show Address \> click on link to results \> top row is [feature, tag] in this case [amenity, bank].
 
@@ -203,7 +196,12 @@ pharmacy = osmdata_sf(q=query)
 
 ```{r eval=FALSE, include=FALSE}
 #answer
-mapview(restaurant$osm_polygons, legend=F, label = restaurant$osm_polygons$name ) + mapview(pharmacy$osm_polygons, legend=F, label = restaurant$osm_polygons$name )
+mapview(restaurant$osm_polygons, 
+        legend=F, 
+        label = restaurant$osm_polygons$name ) + 
+  mapview(pharmacy$osm_polygons, 
+          legend=F, 
+          label = restaurant$osm_polygons$name )
 ```
 
 ```{r}

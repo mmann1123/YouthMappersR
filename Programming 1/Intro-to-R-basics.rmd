@@ -2,23 +2,33 @@
 title: "Introduction to R Basics"
 output: html_document
 ---
- 
 
-Before we begin our exercise, we need to install all the needed packages - we only need to use `install.packages()` once for each. However EVERY time you start using R you will need to run `library()` to load the installed package. 
+# Setting Up Your Computer
+
+R packages are extensions to the R statistical programming language. R packages contain code, data, and documentation in a standardised collection format that can be installed by users of R. Each package (or library) adds additional functionality to the base functionality of R.  For instance `sf` allows us to read and write shapefiles, and do lots of core GIS operations, and `mapview` allows us to create interative maps.  The large number of packages available for R, and the ease of installing and using them, has been cited as a major factor driving the widespread adoption of the language in geography.
+
+Before we begin our exercise, we need to install all the needed packages - we only need to use `install.packages()` once the first time you use a new package.  
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(warning=FALSE)
 ```
 
+In this case I have already installed all the needed packages, so we don't need to run the next block of code. 
+
 ```{r}
 
-#install required packages
-if(!require("tidyverse")) install.packages("tidyverse")
-if(!require("sf")) install.packages("sf")
-if(!require("mapview")) install.packages("mapview")
-if(!require("dplyr")) install.packages("dplyr")
+# DO NOT RUN INSTALL PACKAGES THIS HAS BEEN RUN FOR YOU ALREADY
+# install required packages
+#install.packages("tidyverse")
+#install.packages("sf")
+#install.packages("mapview")
+#install.packages("dplyr")
+```
 
+*EVERY* time you start using R you will need to run `library()` to load the required packages that have already been installed. 
+
+```{r}
 #load packages
 library(tidyverse)
 library(sf)
@@ -28,10 +38,11 @@ library(dplyr)
 ```
 
 
+# Basic Data Structions
 
-The most straight forward way to store a list of numbers is through an assignment using the c command. (c stands for "combine.") The idea is that a list of numbers is stored under a given name, and the name is used to refer to the data. A list is specified with the c command, and assignment is specified with the "\<-" or "=" symbols. Another term used to describe the list of numbers is to call it a "vector".
+The most straight forward way to store a list of numbers is through an assignment using the `c()` command (c stands for "combine"). The idea is that a list of numbers is stored under a given name, and the name is used to refer to the data. A list is specified with the `c()` command, and assignment is specified with the "\<-" or "=" symbols. Another term used to describe the list of numbers is to call it a "vector".
 
-The numbers within the c command are separated by commas.
+The each element within the `c()` command is separated by commas.
 
 As an example, we can create a new variable, called `bubba` which will contain the numbers 3, 5, 7, and 9:
 
@@ -39,11 +50,10 @@ As an example, we can create a new variable, called `bubba` which will contain t
 bubba = c(3,5,7,9)
 ```
 
-When you enter this command you should not see any output except a new command line. The command creates a list of numbers called "bubba." To see what numbers is included in bubba type "bubba" and press the shift+control+enter key:
+When you enter this command you should not see any output except a new command line. The command creates a list of numbers called `bubba`. To see what numbers is included in bubba type `bubba` and press the `shift+control+enter` key:
 
 ```{r}
 bubba
-
 ```
 
 If you wish to work with one of the numbers you can get access to it using the variable and then square brackets indicating which number. Try the example below:
@@ -51,11 +61,9 @@ If you wish to work with one of the numbers you can get access to it using the v
 ```{r}
 bubba[2]
 bubba[1]
-bubba[0]
-
 ```
 
-Notice that the first entry is referred to as the number 1 entry, and the zero entry can be used to indicate how the computer will treat the data. or use class(bubba).
+Notice that the first entry is referred to as the number 1 entry.
 
 You can store strings using both single and double quotes, and you can store real numbers.
 
@@ -84,7 +92,7 @@ bubba_test    # it simply converts 1 to '1' stored as a character
 
 # Reading in a CSV file 
 
-Unfortunately, it is rare to have just a few data pointsthat you do not mind typing in at the prompt. It is much more common to have a lot of data points with complicated relationships. Here we will examine how to read a data set from a file using the read.csv function but first discuss the format of a data file.
+Unfortunately, it is rare to have just a few data points that you do not mind typing in at the prompt. It is much more common to have a lot of data points with complicated relationships. Here we will examine how to read a data set from a file using the read.csv function but first discuss the format of a data file.
 
 We assume that the data file is in the format called "comma separated values" (csv). That is, each line contains a row of values which can be numbers or letters, and each value is separated by a comma. We also assume that the very first row contains a list of labels. The idea is that the labels in the top row are used to refer to the different columns of values.
 
@@ -145,10 +153,6 @@ US$Population
 ```
 
 
--------------------------------------------------------
-
-
-
 # Manipulating Data 
 
 ## Adding new columns
@@ -177,7 +181,7 @@ US_subset = subset(US, select = c(City,State,pop_den, Lat,Lon ))
 
 In this section we will be introducing the use of spatial data types. Spatial vector data (points, lines, polygons) is a simple extension of non-spatial 'dataframes' we were using above. Essentially we keep the data in the same order, but we add a few things including, most importantly, a column called `geometry` which in this case will hold the `Lat` `Lon` pairs for each US city in our dataset. 
 
-We can assign a new `geometry` to our data by converting our dataframe into a `sf` (simple feature) datatype with the function `st_as_sf`, which needs our original data `US` and the name of columns holding the `coords` (coordinates) for our points. 
+We can assign a new `geometry` to our data by converting our dataframe into a `sf` (simple feature) datatype with the function `st_as_sf()`, which needs our original data `US` and the name of columns holding the `coords` (coordinates) for our points. 
 
 
 ```{r}
@@ -185,19 +189,21 @@ US_sp = st_as_sf(US, coords = c("Lon","Lat") )
 US_sp
 ```
 
-We can see that the geometry column looks right. 
+We can see that the geometry column has changed. 
 
 ```{r}
 US_sp$geometry
 ```
-
 
 Let's take a look at our city points on a map to see if it worked. 
 
 ```{r}
 mapview(US_sp)
 ```
-Hmmm... something is clearly wrong. We told `US_sp` what the lat and lon of the points were. 
+
+Hmmm... something is clearly wrong. I think we are in the ocean here.  
+
+We told `US_sp` what the lat and lon of the points were. 
 
 So what is wrong?
 
@@ -220,14 +226,15 @@ US_sp = st_as_sf(US,
 US_sp
 ```
 
-
 To learn more about EPSG codes and crs more generally refer [here](https://pygis.io/docs/d_understand_crs_codes.html).
+
 
 Ok let's see if that fixed things. 
 
 ```{r}
 mapview(US_sp)
 ```
+
 Perfect!  Ok actually its just ok. Let's see if we can make it more interesting.  Let's use `zcol` to tell `mapview` which column it should plot data from:
 
 ```{r}
@@ -246,11 +253,9 @@ mapview(US_sp, cex='Population', zcol='Population', label='City')
 ```
 
 
---------------------------------------------
-
 # Reading/Writing Shapefiles 
 
-The `sf` library can also handle shapefile (and a number of other formats). To do this, we need to use the `read_sf` function and point it to the shapefile we are interested in, in this case one of US population. 
+The `sf` library can also handle shapefiles (and a number of other formats). To do this, we need to use the `read_sf` function and point it to the shapefile we are interested in, in this case one of US population. 
 
 Let's read it in and take a look:
 
@@ -263,10 +268,11 @@ Note again the existence of the `geometry` column, this time holding polygons. A
 Let's see what it looks like:
 
 ```{r}
-mapview(us_pop,zcol="population")
+mapview(us_pop,
+        zcol="population")
 ```
 
-We can use these polygon features to calculate spatial properties like area. Here we are creating a new column called `area` and assigning it the area of each polygon as calculated by `st_area`. 
+We can use these polygon features to calculate spatial properties like area. Here we are creating a new column called `area` and assigning it the area of each polygon as calculated by `st_area`. As before we will be using `$` to create a new column to store the area of each polygon. 
 
 ```{r}
 us_pop$area = st_area(us_pop)  
@@ -279,7 +285,8 @@ In turn we can use this to calculate population density and assign it to a new c
 us_pop$pop_den = us_pop$population / us_pop$area
 mapview(us_pop,zcol="pop_den")
 ```
-Weird! I don't see anything. There are two reasons for this. First, we calculate population / meter$^2$, which creates very very small numbers (and probably some rounding errors), and second, we have an outlier - Zoom into Washington DC (the best city in America).  Washington is different because it is both a 'state' and a city - so its population density is an outlier - and is messing up the color scheme. Everything else is so much lower, they are all getting assigned the color purple. 
+
+Weird! I don't see anything. There are two reasons for this. First, we calculated population density as  (population / meter$^2$), which creates very very small numbers (and probably some rounding errors), and second, we have an outlier - Zoom into Washington DC (the best city in America).  Washington is different because it is both a 'state' and a city - so its population density is an outlier - and is messing up the color scheme. Everything else is so much lower, they are all getting assigned the color purple. 
 
 Let's try to fix this. First we will recalculate `area` but in population / km$^2$, and let's plot it again. 
 
@@ -288,6 +295,7 @@ us_pop$area = as.numeric(st_area(us_pop) / (1000*1000) )
 us_pop$pop_den =  us_pop$population / us_pop$area
 mapview(us_pop,zcol="pop_den")
 ```
+
 The number range on the legend looks better, but the color scheme isn't working yet. Let's look at the number range of `pop_den`. To get a sense of where the number are.
 
 ```{r}
@@ -332,6 +340,10 @@ northern
 Chicago =  US_subset %>% filter(City == 'Chicago')
 Chicago
 ```
+
+
+-----------------------------------------------
+
 
 # Want to learn more about R basics?  
 Swirl has a variety of lessons on methods in R.  These are interactive lessons and cover everything from basic data structures, to data visualization. 

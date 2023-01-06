@@ -8,15 +8,18 @@ knitr::opts_chunk$set(warning=FALSE)
 ```
 # Packages  
 
-You can extend the capabilities of R by installing and importing packages written by folks like you. For a list of packages relevant to spatial data go to  [http://cran.r-project.org/web/views/Spatial.html](http://cran.r-project.org/web/views/Spatial.html)
+We are going to extend the capabilities of R by installing and importing packages written by folks like you. For a list of packages relevant to spatial data go to  [http://cran.r-project.org/web/views/Spatial.html](http://cran.r-project.org/web/views/Spatial.html)
 
 The first time you use a new version of R you will have to install all your packages. Try installing the raster package:
 
+I have already done this for you so please don't run this:
+
 ```{r eval=FALSE, include=TRUE}
-install.packages('raster')
+# already installed
+#install.packages('raster')
 ```
 
-Now it is installed in your computer but isn't loaded. You will have to 'import' your library package every time you start up R. 
+Now it is installed in your computer but isn't loaded. You will have to 'import' the libraries (packages) you want to use every time you start up R. 
 
 ```{r}
 library(raster)
@@ -42,6 +45,7 @@ for (val in sequence) {
 Statement
 }
 ```
+
 In the above syntax, the vector is represented by sequence, and val is the value of the vector during the For Loop.
 
 Now let’s see the process undertaken by for loop condition with the help of a flow chart. First, the loop repeats itself for every item in the sequence until the required condition is reached. Then, the condition is checked, and when the last item is reached compiler exists the loop.
@@ -51,13 +55,14 @@ Now let’s see the process undertaken by for loop condition with the help of a 
 The structure consists of initialization shown as “init,” the rhombus, a decision box, and a rectangular box that is the body of the for a loop. While executing a set of commands under for loop condition, the compiler doesn’t start the loop until the condition is specified. If there is no condition available, the next instruction after the loop will be executed. For each item in the sequence, the condition is matched. Until the condition isn’t matched, the loop goes over and over again. Once the last item or the condition is satisfied, the compiler exists in the loop.
 
 The basic for loop iterating through a numeric sequence:
+
 ```{r}
 for(i in c(1:10)){
     print(i)
 }
 ```
 
-Loop through a list of names
+Loop through a list of names:
 
 ```{r}
 names= c('sally','jim','george')
@@ -83,6 +88,7 @@ print('but I live in Washington DC')
 ## Nested for loops
 
 We can also create nested loops that iterate through two sets of data:
+
 ```{r}
 numbers = c(1,2,3)
 names = c('sally','jim','george')
@@ -137,7 +143,7 @@ for(name in names){
 
 ```
 
-# CHALLENGE 3  
+# EXTRA CHALLENGE 3  
 Create a nested loop that prints each element of a matrix. Start with the first row, first column then move to the second column and continue until you have printed back all the elements. 
 
 Important: to access rows and columns of `printme` use the notation `printme[row,column]`, so `printme[1,3]` would be the 1st row, 3rd column. Also remember to use the `print()` function to print out the response, e.g. `print(printme[1,3])`.
