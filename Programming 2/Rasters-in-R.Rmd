@@ -338,7 +338,7 @@ plot(zion_points, add=TRUE, col='red')
 The following command extracts elevation values from `srtm` and creates a data frame with `points` IDs (one value per vector’s row) and related `srtm` values for each point. 
 
 ```{r}
-elevation = extract(srtm, zion_points)
+elevation = raster::extract(srtm, zion_points)
 elevation
 ```
 
@@ -418,7 +418,7 @@ mapview(restaurant_points,
 
 Let's extract the elevation of each restaurant, following the same code as earlier:
 ```{r}
-elevation = extract(srtm, restaurant_points)
+elevation = raster::extract(srtm, restaurant_points)
 elevation
 ```
 
@@ -483,7 +483,7 @@ zion_transect
 Finally, we can extract elevation values for each point in our transects and combine this information with our main object.
 
 ```{r}
-zion_elev = extract(srtm, zion_transect)
+zion_elev = raster::extract(srtm, zion_transect)
 zion_transect = cbind(zion_transect, zion_elev)
 zion_transect
 ```
